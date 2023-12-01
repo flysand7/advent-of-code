@@ -8,6 +8,8 @@ import "core:slice"
 import "core:testing"
 import "core:time"
 import "core:mem"
+import "core:thread"
+import "core:intrinsics"
 
 INPUT_PATH :: "./input"
 
@@ -87,11 +89,13 @@ digit_numbers: [10]int = {
     8,
 }
 
-part2 :: proc(input: string) -> int {
+part2_proc :: proc(t: ^thread.Thread) {
+    input_start := cast(int)uintptr(t.user_args[1])
+    input_end   := cast(int)uintptr(t.user_args[2])
+    input := transmute(string) ((cast([^]u8) t.user_args[0])[input_start:input_end])
+    sum_first := 0
+    sum_last  := 0
     input1 := input
-    input2 := input
-    sum_first: int = 0
-    sum_last:  int = 0
     find_next_first: for line in strings.split_lines_iterator(&input1) {
         for i := 0; i < len(line); i += 1 {
             if '0' <= line[i] && line[i] <= '9' {
@@ -109,6 +113,7 @@ part2 :: proc(input: string) -> int {
             }
         }
     }
+    input2 := input
     find_next_last: for line in strings.split_lines_iterator(&input2) {
         for i := len(line) - 1; i >= 0; i -= 1 {
             if '0' <= line[i] && line[i] <= '9' {
@@ -126,7 +131,37 @@ part2 :: proc(input: string) -> int {
             }
         }
     }
-    return sum_first*10 + sum_last
+    intrinsics.atomic_add_explicit(cast(^int) t.user_args[3], sum_first, .Release)
+    intrinsics.atomic_add_explicit(cast(^int) t.user_args[4], sum_last,  .Release)
+}
+
+N_THREADS :: 4
+part2 :: proc(input: string) -> int {
+    sum_first: int = 0
+    sum_last:  int = 0
+    last_split_index := -1
+    threads: [N_THREADS]^thread.Thread
+    for i in 0..<N_THREADS {
+        t := thread.create(part2_proc)
+        threads[i] = t
+        t.user_args[0] = raw_data(input)
+        t.user_args[1] = cast(rawptr) uintptr(last_split_index+1)
+        last_split_index = (len(input) / N_THREADS) * (i+1)
+        if last_split_index > len(input) {
+            last_split_index = len(input)
+        }
+        for last_split_index < len(input) && input[last_split_index] != '\n' {
+            last_split_index += 1
+        }
+        t.user_args[2] = cast(rawptr) uintptr(last_split_index)
+        t.user_args[3] = &sum_first
+        t.user_args[4] = &sum_last
+        thread.start(t)
+    }
+    for i in 0..<N_THREADS {
+        thread.join(threads[i])
+    }
+    return 10*sum_first + sum_last
 }
 
 @(test)
