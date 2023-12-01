@@ -61,17 +61,30 @@ zoneight234
 7pqrstsixteen
 `
 
-digit_names: map[string]int = {
-    "zero"  = 0,
-    "one"   = 1,
-    "two"   = 2,
-    "three" = 3,
-    "four"  = 4,
-    "five"  = 5,
-    "six"   = 6,
-    "seven" = 7,
-    "eight" = 8,
-    "nine"  = 9,
+digit_names: [10]string = {
+    "one",
+    "two",
+    "six",
+    "zero",
+    "four",
+    "five",
+    "nine",
+    "three",
+    "seven",
+    "eight",
+}
+
+digit_numbers: [10]int = {
+    1,
+    2,
+    6,
+    0,
+    4,
+    5,
+    9,
+    3,
+    7,
+    8,
 }
 
 part2 :: proc(input: string) -> int {
@@ -84,9 +97,11 @@ part2 :: proc(input: string) -> int {
                 first = int(line[i] - '0')
                 break found_first
             } else {
-                for key, value in digit_names do if strings.has_prefix(line[i:], key) {
-                    first = value
-                    break found_first
+                for name, index in digit_names {
+                    if strings.has_prefix(line[i:], name) {
+                        first = digit_numbers[index]
+                        break found_first
+                    }
                 }
             }
         }
@@ -95,9 +110,11 @@ part2 :: proc(input: string) -> int {
                 last = int(line[i] - '0')
                 break found_last
             } else {
-                for key, value in digit_names do if strings.has_prefix(line[i:], key) {
-                    last = value
-                    break found_last
+                for name, index in digit_names {
+                    if strings.has_prefix(line[i:], name) {
+                        last = digit_numbers[index]
+                        break found_last
+                    }
                 }
             }
         }
