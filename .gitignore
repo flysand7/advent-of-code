@@ -2,6 +2,6 @@
 # Odin output
 *.bin
 
-# Odin language server settings
+# Editor-specific
 /ols.json
-
+/.vscode
