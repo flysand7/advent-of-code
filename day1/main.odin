@@ -78,29 +78,30 @@ part2 :: proc(input: string) -> int {
     input := input
     sum: int = 0
     for line in strings.split_lines_iterator(&input) {
-        first, last: Maybe(int)
-        for i := 0; i < len(line); i += 1 {
-            digit: Maybe(int)
+        first, last: int = -1, -1
+        found_first: for i := 0; i < len(line); i += 1 {
             if '0' <= line[i] && line[i] <= '9' {
-                // Fast path: the digit is numerical, 0 through 9
-                digit = int(line[i] - '0')
+                first = int(line[i] - '0')
+                break found_first
             } else {
-                // Slow path: the digit is specified by name
                 for key, value in digit_names do if strings.has_prefix(line[i:], key) {
-                    digit = value
-                    break
-                }
-                if digit == nil {
-                    continue
+                    first = value
+                    break found_first
                 }
             }
-            // Assign first digit only once, last digit every time
-            if first == nil {
-                first = digit.?
-            }
-            last = digit.?
         }
-        final_number := 10*first.? + last.?
+        found_last: for i := len(line) - 1; i >= 0; i -= 1 {
+            if '0' <= line[i] && line[i] <= '9' {
+                last = int(line[i] - '0')
+                break found_last
+            } else {
+                for key, value in digit_names do if strings.has_prefix(line[i:], key) {
+                    last = value
+                    break found_last
+                }
+            }
+        }
+        final_number := 10*first + last
         sum += final_number
     }
     return sum
