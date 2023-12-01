@@ -94,9 +94,8 @@ has_prefix_fast :: proc(s, prefix: string) -> (result: bool) #no_bounds_check {
 }
 
 part2_proc1 :: proc(t: ^thread.Thread) {
-    input_start := cast(int)uintptr(t.user_args[1])
-    input_end   := cast(int)uintptr(t.user_args[2])
-    input := transmute(string) ((cast([^]u8) t.user_args[0])[input_start:input_end])
+    input_len   := cast(int)uintptr(t.user_args[1])
+    input := transmute(string) ((cast([^]u8) t.user_args[0])[0:input_len])
     sum_first := 0
     find_next_first: for line in strings.split_lines_iterator(&input) {
         for i := 0; i < len(line); i += 1 {
@@ -122,13 +121,12 @@ part2_proc1 :: proc(t: ^thread.Thread) {
             }
         }
     }
-    intrinsics.atomic_add_explicit(cast(^int) t.user_args[3], sum_first, .Release)
+    intrinsics.atomic_add_explicit(cast(^int) t.user_args[2], sum_first, .Release)
 }
 
 part2_proc2 :: proc(t: ^thread.Thread) {
-    input_start := cast(int)uintptr(t.user_args[1])
-    input_end   := cast(int)uintptr(t.user_args[2])
-    input := transmute(string) ((cast([^]u8) t.user_args[0])[input_start:input_end])
+    input_len   := cast(int)uintptr(t.user_args[1])
+    input := transmute(string) ((cast([^]u8) t.user_args[0])[0:input_len])
     sum_last  := 0
     find_next_last: for line in strings.split_lines_iterator(&input) {
         for i := len(line) - 1; i >= 0; i -= 1 {
@@ -154,43 +152,25 @@ part2_proc2 :: proc(t: ^thread.Thread) {
             }
         }
     }
-    intrinsics.atomic_add_explicit(cast(^int) t.user_args[3], sum_last,  .Release)
+    intrinsics.atomic_add_explicit(cast(^int) t.user_args[2], sum_last,  .Release)
 }
-
-// MUST BE EVEN!
-N_THREADS :: 4
 
 part2 :: proc(input: string) -> int {
     sum_first: int = 0
     sum_last:  int = 0
     last_split_index := -1
-    threads: [N_THREADS]^thread.Thread
-    for i in 0..<N_THREADS/2 {
-        t1 := thread.create(part2_proc1)
-        t2 := thread.create(part2_proc2)
-        threads[2*i+0] = t1
-        threads[2*i+1] = t2
-        t1.user_args[0] = raw_data(input)
-        t1.user_args[1] = cast(rawptr) uintptr(last_split_index+1)
-        last_split_index = (len(input) / (N_THREADS/2)) * (i+1)
-        if last_split_index > len(input) {
-            last_split_index = len(input)
-        }
-        for last_split_index < len(input) && input[last_split_index] != '\n' {
-            last_split_index += 1
-        }
-        t1.user_args[2] = cast(rawptr) uintptr(last_split_index)
-        t2.user_args[0] = t1.user_args[0]
-        t2.user_args[1] = t1.user_args[1]
-        t2.user_args[2] = t1.user_args[2]
-        t1.user_args[3] = &sum_first
-        t2.user_args[3] = &sum_last
-        thread.start(t1)
-        thread.start(t2)
-    }
-    for i in 0..<N_THREADS {
-        thread.join(threads[i])
-    }
+    t1 := thread.create(part2_proc1)
+    t2 := thread.create(part2_proc2)
+    t1.user_args[0] = raw_data(input)
+    t1.user_args[1] = cast(rawptr) cast(uintptr) len(input)
+    t2.user_args[0] = raw_data(input)
+    t2.user_args[1] = cast(rawptr) cast(uintptr) len(input)
+    t1.user_args[2] = &sum_first
+    t2.user_args[2] = &sum_last
+    thread.start(t1)
+    thread.start(t2)
+    thread.join(t1)
+    thread.join(t2)
     return 10*sum_first + sum_last
 }
 
