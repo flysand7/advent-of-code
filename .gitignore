@@ -1,0 +1,7 @@
+
+# Odin output
+*.bin
+
+# Odin language server settings
+/ols.json
+
