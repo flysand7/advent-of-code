@@ -62,31 +62,41 @@ zoneight234
 
 part2 :: proc(input: string) -> int {
     input := input
-    digit_map: map[string]int = {
-        "0" = 0, "zero"  = 0,
-        "1" = 1, "one"   = 1,
-        "2" = 2, "two"   = 2,
-        "3" = 3, "three" = 3,
-        "4" = 4, "four"  = 4,
-        "5" = 5, "five"  = 5,
-        "6" = 6, "six"   = 6,
-        "7" = 7, "seven" = 7,
-        "8" = 8, "eight" = 8,
-        "9" = 9, "nine"  = 9,
+    digit_names: map[string]int = {
+        "zero"  = 0,
+        "one"   = 1,
+        "two"   = 2,
+        "three" = 3,
+        "four"  = 4,
+        "five"  = 5,
+        "six"   = 6,
+        "seven" = 7,
+        "eight" = 8,
+        "nine"  = 9,
     }
     sum: int = 0
     for line in strings.split_lines_iterator(&input) {
         first, last: Maybe(int)
         for i := 0; i < len(line); i += 1 {
-            for key in digit_map {
-                if strings.has_prefix(line[i:], key) {
-                    digit := digit_map[key]
-                    if first == nil {
-                        first = digit
-                    }
-                    last = digit
+            digit: Maybe(int)
+            if '0' <= line[i] && line[i] <= '9' {
+                // Fast path: the digit is numerical, 0 through 9
+                digit = int(line[i] - '0')
+            } else {
+                // Slow path: the digit is specified by name
+                for key, value in digit_names do if strings.has_prefix(line[i:], key) {
+                    digit = value
+                    break
+                }
+                if digit == nil {
+                    continue
                 }
             }
+            // Assign first digit only once, last digit every time
+            if first == nil {
+                first = digit.?
+            }
+            last = digit.?
         }
         final_number := 10*first.? + last.?
         sum += final_number
