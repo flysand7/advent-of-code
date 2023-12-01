@@ -7,6 +7,7 @@ import "core:strings"
 import "core:slice"
 import "core:testing"
 import "core:time"
+import "core:mem"
 
 INPUT_FILENAME :: "./input"
 
@@ -51,11 +52,22 @@ part2_run :: proc(t: ^testing.T) {
 // -----------------------------------  MISC --------------------------------------------------//
 
 runner :: proc(fn: #type proc(input: string) -> int, input: string) {
+    // Create arena allocator
+    allocator_storage := make([]u8, 8 * mem.Megabyte)
+    arena: mem.Arena
+    mem.arena_init(&arena, allocator_storage)
+    allocator := mem.arena_allocator(&arena)
+    context.allocator = allocator
+    context.temp_allocator = allocator
+    // Profile the function
     t_start := time.now()
-    result := part1(input)
+    result := fn(input)
     t_dur := time.diff(t_start, time.now())
+    memory := arena.peak_used
+    // Print the results
     fmt.printf("--------------------------------\n")
     fmt.printf("  Result: %v\n", result)
-    fmt.printf("  Took: %v\n", t_dur)
+    fmt.printf("  Time: %v\n", t_dur)
+    fmt.printf("  Memory: %v bytes\n", memory)
     fmt.printf("--------------------------------\n")
 }
