@@ -88,40 +88,45 @@ digit_numbers: [10]int = {
 }
 
 part2 :: proc(input: string) -> int {
-    input := input
-    sum: int = 0
-    for line in strings.split_lines_iterator(&input) {
-        first, last: int = -1, -1
-        found_first: for i := 0; i < len(line); i += 1 {
+    input1 := input
+    input2 := input
+    sum_first: int = 0
+    sum_last:  int = 0
+    find_next_first: for line in strings.split_lines_iterator(&input1) {
+        for i := 0; i < len(line); i += 1 {
             if '0' <= line[i] && line[i] <= '9' {
-                first = int(line[i] - '0')
-                break found_first
+                sum_first += int(line[i] - '0')
+                continue find_next_first
             } else {
                 for name, index in digit_names {
                     if strings.has_prefix(line[i:], name) {
-                        first = digit_numbers[index]
-                        break found_first
+                        sum_first += digit_numbers[index]
+                        continue find_next_first
+                    } else if len(name) > len(line[i:]) {
+                        break
                     }
                 }
             }
         }
-        found_last: for i := len(line) - 1; i >= 0; i -= 1 {
-            if '0' <= line[i] && line[i] <= '9' {
-                last = int(line[i] - '0')
-                break found_last
-            } else {
-                for name, index in digit_names {
-                    if strings.has_prefix(line[i:], name) {
-                        last = digit_numbers[index]
-                        break found_last
-                    }
-                }
-            }
-        }
-        final_number := 10*first + last
-        sum += final_number
     }
-    return sum
+    find_next_last: for line in strings.split_lines_iterator(&input2) {
+        for i := len(line) - 1; i >= 0; i -= 1 {
+            if '0' <= line[i] && line[i] <= '9' {
+                sum_last += int(line[i] - '0')
+                continue find_next_last
+            } else {
+                for name, index in digit_names {
+                    if strings.has_prefix(line[i:], name) {
+                        sum_last += digit_numbers[index]
+                        continue find_next_last
+                    } else if len(name) > len(line[i:]) {
+                        break
+                    }
+                }
+            }
+        }
+    }
+    return sum_first*10 + sum_last
 }
 
 @(test)
@@ -155,4 +160,8 @@ runner :: proc(fn: #type proc(input: string) -> int, input: string) {
     fmt.printf("  Time: %v\n", t_dur)
     fmt.printf("  Memory: %v bytes\n", memory)
     fmt.printf("--------------------------------\n")
+}
+
+main :: proc() {
+    runner(part2, PART2_EXAMPLE)
 }
