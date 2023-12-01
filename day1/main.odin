@@ -8,7 +8,7 @@ import "core:slice"
 import "core:testing"
 import "core:time"
 
-INPUT_PATH :: "day1/input"
+INPUT_PATH :: "./input"
 
 // -----------------------------------  PART 1 --------------------------------------------------//
 
@@ -45,7 +45,7 @@ part1_example :: proc(t: ^testing.T) {
 
 @(test)
 part1_run :: proc(t: ^testing.T) {
-    runner(part1, INPUT_PATH)
+    runner(part1, #load(INPUT_PATH))
 }
 
 // -----------------------------------  PART 2 --------------------------------------------------//
@@ -101,21 +101,17 @@ part2_example :: proc(t: ^testing.T) {
 
 @(test)
 part2_run :: proc(t: ^testing.T) {
-    runner(part2, INPUT_PATH)
+    runner(part2, #load(INPUT_PATH))
 }
 
 // -----------------------------------  MISC --------------------------------------------------//
 
-runner :: proc(fn: #type proc(input_file: string) -> int, input_file: string) {
+runner :: proc(fn: #type proc(input: string) -> int, input: string) {
     t_start := time.now()
-    file_bytes, ok := os.read_entire_file(input_file)
-    assert(ok, "Input file not found")
-    file_string := transmute(string) file_bytes
-    result := part1(file_string)
+    result := fn(input)
     fmt.printf("--------------------------------\n")
     fmt.printf("  Result: %v\n", result)
-    t_end := time.now()
-    t_dur := time.diff(t_start, t_end)
+    t_dur := time.diff(t_start, time.now())
     fmt.printf("  Took: %v\n", t_dur)
     fmt.printf("--------------------------------\n")
 }
