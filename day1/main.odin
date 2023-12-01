@@ -89,6 +89,10 @@ digit_numbers: [10]int = {
     8,
 }
 
+has_prefix_fast :: proc(s, prefix: string) -> (result: bool) #no_bounds_check {
+    return s[0:len(prefix)] == prefix
+}
+
 part2_proc1 :: proc(t: ^thread.Thread) {
     input_start := cast(int)uintptr(t.user_args[1])
     input_end   := cast(int)uintptr(t.user_args[2])
@@ -100,12 +104,19 @@ part2_proc1 :: proc(t: ^thread.Thread) {
                 sum_first += int(line[i] - '0')
                 continue find_next_first
             } else {
-                for name, index in digit_names {
-                    if strings.has_prefix(line[i:], name) {
+                str := line[i:]
+                max_index := 10
+                if len(str) < 3 {
+                    continue
+                } else if len(str) == 3 {
+                    max_index = 3
+                } else if len(str) < 4 {
+                    max_index = 7
+                }
+                for name, index in digit_names[:max_index] {
+                    if has_prefix_fast(str, name) {
                         sum_first += digit_numbers[index]
                         continue find_next_first
-                    } else if len(name) > len(line[i:]) {
-                        break
                     }
                 }
             }
@@ -125,12 +136,19 @@ part2_proc2 :: proc(t: ^thread.Thread) {
                 sum_last += int(line[i] - '0')
                 continue find_next_last
             } else {
-                for name, index in digit_names {
-                    if strings.has_prefix(line[i:], name) {
+                str := line[i:]
+                max_index := 10
+                if len(str) < 3 {
+                    continue
+                } else if len(str) == 3 {
+                    max_index = 3
+                } else if len(str) < 4 {
+                    max_index = 7
+                }
+                for name, index in digit_names[:max_index] {
+                    if has_prefix_fast(str, name) {
                         sum_last += digit_numbers[index]
                         continue find_next_last
-                    } else if len(name) > len(line[i:]) {
-                        break
                     }
                 }
             }
