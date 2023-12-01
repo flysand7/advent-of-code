@@ -109,9 +109,9 @@ part2_run :: proc(t: ^testing.T) {
 runner :: proc(fn: #type proc(input: string) -> int, input: string) {
     t_start := time.now()
     result := fn(input)
+    t_dur := time.diff(t_start, time.now())
     fmt.printf("--------------------------------\n")
     fmt.printf("  Result: %v\n", result)
-    t_dur := time.diff(t_start, time.now())
     fmt.printf("  Took: %v\n", t_dur)
     fmt.printf("--------------------------------\n")
 }
