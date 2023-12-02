@@ -27,40 +27,24 @@ part1 :: proc(input: string) -> int {
     max_blue  := 14
     sum := 0
     input := input
-    for line in strings.split_lines_after_iterator(&input) {
+    check_next_game: for line in strings.split_lines_after_iterator(&input) {
         line := line[:len(line)-1]
         colon_index := strings.index_byte(line, ':')
         game_id := strconv.atoi(line[5:colon_index])
-        possible := true
         games := line[colon_index+2:]
-        check_game: for draw in strings.split_iterator(&games, "; ") {
+        for draw in strings.split_iterator(&games, "; ") {
             draw := draw
             for color_draw in strings.split_iterator(&draw, ", ") {
                 space_idx := strings.index_byte(color_draw, ' ')
                 number := strconv.atoi(color_draw[:space_idx])
-                color  := color_draw[space_idx+1:]
-                switch color {
-                case "red":
-                    if number > max_red {
-                        possible = false
-                        break check_game
-                    }
-                case "green":
-                    if number > max_green {
-                        possible = false
-                        break check_game
-                    }
-                case "blue":
-                    if number > max_blue {
-                        possible = false
-                        break check_game
-                    }
+                switch color_draw[space_idx+1:] {
+                case "red":   if number > max_red   do continue check_next_game
+                case "green": if number > max_green do continue check_next_game
+                case "blue":  if number > max_blue  do continue check_next_game
                 }
             }
         }
-        if possible {
-            sum += game_id
-        }
+        sum += game_id
     }
     return sum
 }
@@ -103,9 +87,9 @@ part2 :: proc(input: string) -> int {
                 number := strconv.atoi(color_draw[:space_idx])
                 color  := color_draw[space_idx+1:]
                 switch color {
-                    case "red":   max_red = max(max_red, number)
+                    case "red":   max_red   = max(max_red,   number)
                     case "green": max_green = max(max_green, number)
-                    case "blue":  max_blue = max(max_blue, number)
+                    case "blue":  max_blue  = max(max_blue,  number)
                 }
             }
         }
