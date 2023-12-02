@@ -88,8 +88,11 @@ part2 :: proc(input: string) -> int {
                 case 'b': max_blue  = max(max_blue,  number)
             }
             last_idx := idx+2
-            stride := strings.index_any(line[last_idx:], ";,")
-            idx = idx+stride+2 if stride != -1 else len(line)
+            for idx = last_idx; idx < len(line); idx += 1 {
+                if line[idx] == ';' || line[idx] == ',' {
+                    break
+                }
+            }
             draw = line[last_idx:idx]
         }
         sum += max_red * max_blue * max_green
