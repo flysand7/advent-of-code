@@ -21,26 +21,33 @@ Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red
 Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green`
 
 part1 :: proc(input: string) -> int {
+    sum := 0
+    input := input
     max_red   := 12
     max_green := 13
     max_blue  := 14
-    sum := 0
-    input := input
     check_next_game: for line in strings.split_lines_after_iterator(&input) {
         colon_index := strings.index_byte(line, ':')
         game_id,_ := strconv.parse_int(line[5:colon_index], 10)
-        games := line[colon_index+2:]
-        for draw in strings.split_iterator(&games, "; ") {
-            draw := draw
-            for color_draw in strings.split_iterator(&draw, ", ") {
-                space_idx := strings.index_byte(color_draw, ' ')
-                number,_ := strconv.parse_int(color_draw[:space_idx], 10)
-                switch color_draw[space_idx+1] {
+        power := 1
+        line := line[colon_index+2:]
+        idx := strings.index_any(line, ";,")
+        draw := line[:idx]
+        for len(draw) > 0 {
+            space_idx := strings.index_byte(draw, ' ')
+            number,_ := strconv.parse_int(draw[:space_idx], 10)
+            switch draw[space_idx+1] {
                 case 'r': if number > max_red   do continue check_next_game
                 case 'g': if number > max_green do continue check_next_game
                 case 'b': if number > max_blue  do continue check_next_game
+            }
+            last_idx := idx+2
+            for idx = last_idx; idx < len(line); idx += 1 {
+                if line[idx] == ';' || line[idx] == ',' {
+                    break
                 }
             }
+            draw = line[last_idx:idx]
         }
         sum += game_id
     }
@@ -79,7 +86,7 @@ part2 :: proc(input: string) -> int {
         max_blue  := 0
         idx := strings.index_any(line, ";,")
         draw := line[:idx]
-        check_game: for len(draw) > 0 {
+        for len(draw) > 0 {
             space_idx := strings.index_byte(draw, ' ')
             number,_ := strconv.parse_int(draw[:space_idx], 10)
             switch draw[space_idx+1] {
