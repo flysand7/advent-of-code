@@ -1,6 +1,5 @@
 package main
 
-
 import "core:os"
 import "core:fmt"
 import "core:strings"
