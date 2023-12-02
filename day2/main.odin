@@ -73,21 +73,24 @@ part2 :: proc(input: string) -> int {
         colon_index := strings.index_byte(line, ':')
         game_id,_ := strconv.parse_int(line[5:colon_index], 10)
         power := 1
-        games := line[colon_index+2:]
+        line := line[colon_index+2:]
         max_red   := 0
         max_green := 0
         max_blue  := 0
-        check_game: for draw in strings.split_iterator(&games, "; ") {
-            draw := draw
-            for color_draw in strings.split_iterator(&draw, ", ") {
-                space_idx := strings.index_byte(color_draw, ' ')
-                number,_ := strconv.parse_int(color_draw[:space_idx], 10)
-                switch color_draw[space_idx+1] {
-                    case 'r': max_red   = max(max_red,   number)
-                    case 'g': max_green = max(max_green, number)
-                    case 'b': max_blue  = max(max_blue,  number)
-                }
+        idx := strings.index_any(line, ";,")
+        draw := line[:idx]
+        check_game: for len(draw) > 0 {
+            space_idx := strings.index_byte(draw, ' ')
+            number,_ := strconv.parse_int(draw[:space_idx], 10)
+            switch draw[space_idx+1] {
+                case 'r': max_red   = max(max_red,   number)
+                case 'g': max_green = max(max_green, number)
+                case 'b': max_blue  = max(max_blue,  number)
             }
+            last_idx := idx+2
+            stride := strings.index_any(line[last_idx:], ";,")
+            idx = idx+stride+2 if stride != -1 else len(line)
+            draw = line[last_idx:idx]
         }
         sum += max_red * max_blue * max_green
     }
