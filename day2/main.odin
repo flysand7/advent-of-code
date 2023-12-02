@@ -100,7 +100,9 @@ part2 :: proc(input: string) -> int {
                     break
                 }
             }
-            draw = line[last_idx:idx]
+            #no_bounds_check {
+                draw = line[last_idx:idx]
+            }
         }
         sum += max_red * max_blue * max_green
     }
