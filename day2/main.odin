@@ -28,13 +28,13 @@ part1 :: proc(input: string) -> int {
     input := input
     check_next_game: for line in strings.split_lines_after_iterator(&input) {
         colon_index := strings.index_byte(line, ':')
-        game_id := strconv.atoi(line[5:colon_index])
+        game_id,_ := strconv.parse_int(line[5:colon_index], 10)
         games := line[colon_index+2:]
         for draw in strings.split_iterator(&games, "; ") {
             draw := draw
             for color_draw in strings.split_iterator(&draw, ", ") {
                 space_idx := strings.index_byte(color_draw, ' ')
-                number := strconv.atoi(color_draw[:space_idx])
+                number,_ := strconv.parse_int(color_draw[:space_idx], 10)
                 switch color_draw[space_idx+1] {
                 case 'r': if number > max_red   do continue check_next_game
                 case 'g': if number > max_green do continue check_next_game
@@ -71,7 +71,7 @@ part2 :: proc(input: string) -> int {
     input := input
     for line in strings.split_lines_after_iterator(&input) {
         colon_index := strings.index_byte(line, ':')
-        game_id := strconv.atoi(line[5:colon_index])
+        game_id,_ := strconv.parse_int(line[5:colon_index], 10)
         power := 1
         games := line[colon_index+2:]
         max_red   := 0
@@ -81,7 +81,7 @@ part2 :: proc(input: string) -> int {
             draw := draw
             for color_draw in strings.split_iterator(&draw, ", ") {
                 space_idx := strings.index_byte(color_draw, ' ')
-                number := strconv.atoi(color_draw[:space_idx])
+                number,_ := strconv.parse_int(color_draw[:space_idx], 10)
                 switch color_draw[space_idx+1] {
                     case 'r': max_red   = max(max_red,   number)
                     case 'g': max_green = max(max_green, number)
