@@ -33,22 +33,31 @@ part1 :: proc(input: string) -> int {
         return '0' <= chr && chr <= '9'
     }
     parse_number_at :: proc(used_indices: ^[dynamic]int, schema: string, index: int) -> int {
+        // Check if the index is "in bounds", i.e. x coordinate is between 0 and width, and
+        // y coordinate is between 0 and height. I used '\n' character to check for horizontal
+        // bounds, as its guaranteed to separate the lines, and we only care about shifts by 1.
+        // This function returns 0 which makes the caller of the function effectively perform a
+        // no-op when adding the result of the function to the accumulator.
         if index < 0 || index >= len(schema) || schema[index] == '\n' {
             return 0
         }
         if ! is_digit(schema[index]) {
             return 0
         }
+        // Scan backwards until we hit the first digit of the number our index points to.
         index := index
         for index != 0 && is_digit(schema[index-1]){
             index -= 1
         }
+        // It is possible that this function is called twice for the number at the same position.
+        // Here I avoid double counting.
         for used_index in used_indices {
             if index == used_index {
                 return 0
             }
         }
         append(used_indices, index)
+        // Parse and return the number.
         n := 0
         for i := index; is_digit(schema[i]); i += 1 {
             n = 10*n + int(schema[i] - '0')
@@ -68,6 +77,9 @@ part1 :: proc(input: string) -> int {
             sum += parse_number_at(&used_indices, input, i+1-stride)
             sum += parse_number_at(&used_indices, input, i+1+stride)
         }
+        // This line can be removed, it's just a perf hack, since our input doesn't contain numbers
+        // that are adjacent to more than one symbol. Adding this yields something like 10x
+        // improvement on real data, and basically transforms the solution from O(n^2) to O(n)
         clear(&used_indices)
     }
     return sum
@@ -105,6 +117,7 @@ part2 :: proc(input: string) -> int {
         return '0' <= chr && chr <= '9'
     }
     parse_number_at :: proc(used_indices: ^[dynamic]int, found: ^int, schema: string, index: int) -> int {
+        // See part 1 code, but it's exactly the same except we return 1 if the number wasn't found.
         if index < 0 || index >= len(schema) || schema[index] == '\n' {
             return 1
         }
