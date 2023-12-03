@@ -32,7 +32,7 @@ part1 :: proc(input: string) -> int {
     is_digit :: proc(chr: u8) -> bool {
         return '0' <= chr && chr <= '9'
     }
-    parse_number_at :: proc(used_indices: ^[dynamic]int, schema: string, index: int) -> int {
+    find_number_at :: proc(used_indices: ^[dynamic]int, schema: string, index: int) -> int {
         // Check if the index is "in bounds", i.e. x coordinate is between 0 and width, and
         // y coordinate is between 0 and height. I used '\n' character to check for horizontal
         // bounds, as its guaranteed to separate the lines, and we only care about shifts by 1.
@@ -68,14 +68,14 @@ part1 :: proc(input: string) -> int {
     sum := 0
     for i in 0 ..< len(input) {
         if input[i] != '\n' && input[i] != '.' && !is_digit(input[i]) {
-            sum += parse_number_at(&used_indices, input, i-1)
-            sum += parse_number_at(&used_indices, input, i+1)
-            sum += parse_number_at(&used_indices, input, i-stride)
-            sum += parse_number_at(&used_indices, input, i+stride)
-            sum += parse_number_at(&used_indices, input, i-1-stride)
-            sum += parse_number_at(&used_indices, input, i-1+stride)
-            sum += parse_number_at(&used_indices, input, i+1-stride)
-            sum += parse_number_at(&used_indices, input, i+1+stride)
+            sum += find_number_at(&used_indices, input, i-1)
+            sum += find_number_at(&used_indices, input, i+1)
+            sum += find_number_at(&used_indices, input, i-stride)
+            sum += find_number_at(&used_indices, input, i+stride)
+            sum += find_number_at(&used_indices, input, i-1-stride)
+            sum += find_number_at(&used_indices, input, i-1+stride)
+            sum += find_number_at(&used_indices, input, i+1-stride)
+            sum += find_number_at(&used_indices, input, i+1+stride)
         }
         // This line can be removed, it's just a perf hack, since our input doesn't contain numbers
         // that are adjacent to more than one symbol. Adding this yields something like 10x
@@ -116,7 +116,7 @@ part2 :: proc(input: string) -> int {
     is_digit :: proc(chr: u8) -> bool {
         return '0' <= chr && chr <= '9'
     }
-    parse_number_at :: proc(used_indices: ^[dynamic]int, found: ^int, schema: string, index: int) -> int {
+    find_number_at :: proc(used_indices: ^[dynamic]int, found: ^int, schema: string, index: int) -> int {
         // See part 1 code, but it's exactly the same except we return 1 if the number wasn't found.
         if index < 0 || index >= len(schema) || schema[index] == '\n' {
             return 1
@@ -147,14 +147,14 @@ part2 :: proc(input: string) -> int {
         if input[i] != '\n' && input[i] != '.' && !is_digit(input[i]) {
             gear_ratio := 1
             found := 0
-            gear_ratio *= parse_number_at(&used_indices, &found, input, i-1)
-            gear_ratio *= parse_number_at(&used_indices, &found, input, i+1)
-            gear_ratio *= parse_number_at(&used_indices, &found, input, i-stride)
-            gear_ratio *= parse_number_at(&used_indices, &found, input, i+stride)
-            gear_ratio *= parse_number_at(&used_indices, &found, input, i-1-stride)
-            gear_ratio *= parse_number_at(&used_indices, &found, input, i-1+stride)
-            gear_ratio *= parse_number_at(&used_indices, &found, input, i+1-stride)
-            gear_ratio *= parse_number_at(&used_indices, &found, input, i+1+stride)
+            gear_ratio *= find_number_at(&used_indices, &found, input, i-1)
+            gear_ratio *= find_number_at(&used_indices, &found, input, i+1)
+            gear_ratio *= find_number_at(&used_indices, &found, input, i-stride)
+            gear_ratio *= find_number_at(&used_indices, &found, input, i+stride)
+            gear_ratio *= find_number_at(&used_indices, &found, input, i-1-stride)
+            gear_ratio *= find_number_at(&used_indices, &found, input, i-1+stride)
+            gear_ratio *= find_number_at(&used_indices, &found, input, i+1-stride)
+            gear_ratio *= find_number_at(&used_indices, &found, input, i+1+stride)
             if found == 2 {
                 sum += gear_ratio
             }
