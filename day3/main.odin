@@ -32,13 +32,6 @@ part1 :: proc(input: string) -> int {
     is_digit :: proc(chr: u8) -> bool {
         return '0' <= chr && chr <= '9'
     }
-    scan_digits :: proc(schema: string, index: int) -> int {
-        index := index
-        for index != 0 && is_digit(schema[index-1]){
-            index -= 1
-        }
-        return index
-    }
     parse_number_at :: proc(used_indices: ^[dynamic]int, schema: string, index: int) -> int {
         if index < 0 || index >= len(schema) || schema[index] == '\n' {
             return 0
@@ -46,18 +39,19 @@ part1 :: proc(input: string) -> int {
         if ! is_digit(schema[index]) {
             return 0
         }
-        start_index := scan_digits(schema, index)
+        index := index
+        for index != 0 && is_digit(schema[index-1]){
+            index -= 1
+        }
         for used_index in used_indices {
-            if start_index == used_index {
+            if index == used_index {
                 return 0
             }
         }
-        append(used_indices, start_index)
-        index := start_index
+        append(used_indices, index)
         n := 0
-        for is_digit(schema[index]) {
-            n = 10*n + int(schema[index] - '0')
-            index += 1
+        for i := index; is_digit(schema[i]); i += 1 {
+            n = 10*n + int(schema[i] - '0')
         }
         return n
     }
@@ -74,6 +68,7 @@ part1 :: proc(input: string) -> int {
             sum += parse_number_at(&used_indices, input, i+1-stride)
             sum += parse_number_at(&used_indices, input, i+1+stride)
         }
+        clear(&used_indices)
     }
     return sum
 }
@@ -109,13 +104,6 @@ part2 :: proc(input: string) -> int {
     is_digit :: proc(chr: u8) -> bool {
         return '0' <= chr && chr <= '9'
     }
-    scan_digits :: proc(schema: string, index: int) -> int {
-        index := index
-        for index != 0 && is_digit(schema[index-1]){
-            index -= 1
-        }
-        return index
-    }
     parse_number_at :: proc(used_indices: ^[dynamic]int, found: ^int, schema: string, index: int) -> int {
         if index < 0 || index >= len(schema) || schema[index] == '\n' {
             return 1
@@ -123,18 +111,19 @@ part2 :: proc(input: string) -> int {
         if ! is_digit(schema[index]) {
             return 1
         }
-        start_index := scan_digits(schema, index)
+        index := index
+        for index != 0 && is_digit(schema[index-1]){
+            index -= 1
+        }
         for used_index in used_indices {
-            if start_index == used_index {
+            if index == used_index {
                 return 1
             }
         }
-        append(used_indices, start_index)
-        index := start_index
+        append(used_indices, index)
         n := 0
-        for is_digit(schema[index]) {
-            n = 10*n + int(schema[index] - '0')
-            index += 1
+        for i := index; is_digit(schema[i]); i += 1 {
+            n = 10*n + int(schema[i] - '0')
         }
         found^ += 1
         return n
