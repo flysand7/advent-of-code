@@ -2,9 +2,9 @@ package main
 
 import "core:os"
 import "core:fmt"
+import "core:slice"
 import "core:strings"
 import "core:strconv"
-import "core:slice"
 import "core:testing"
 import "core:time"
 import "core:mem"
@@ -144,6 +144,10 @@ range_equal :: proc(a, b: Range) -> bool {
     return a.start == b.start && a.end == b.end
 }
 
+range_offset :: proc(range: Range, offset: int) -> Range {
+    return Range { range.start + offset, range.end + offset }
+}
+
 part2 :: proc(input: string) -> int {
     Seed :: struct {
         range:  Range,
@@ -157,14 +161,16 @@ part2 :: proc(input: string) -> int {
         colon := strings.index_byte(line, ':')
         seed_strings := strings.split(line[colon+2:], " ")
         for i := 0; i < len(seed_strings); i += 2 {
-            range_start,  _ := strconv.parse_int(seed_strings[i+0], 10)
-            range_length, _ := strconv.parse_int(seed_strings[i+1], 10)
+            range_start,  ok1 := strconv.parse_int(seed_strings[i+0], 10)
+            range_length, ok2 := strconv.parse_int(seed_strings[i+1], 10)
+            assert(ok1 && ok2)
             append(&seeds, Seed {
                 range  = { range_start, range_start + range_length },
                 mapped = false,
             })
         }
     }
+    fmt.println(len(seeds))
     // Parse the conversion steps
     steps := make([dynamic]Step)
     lines := input[first_line_idx+1:]
@@ -182,53 +188,53 @@ part2 :: proc(input: string) -> int {
             continue
         }
         splits := strings.split(line, " ")
-        dst_index, _ := strconv.parse_int(splits[0])
-        src_index, _ := strconv.parse_int(splits[1])
-        length, _    := strconv.parse_int(splits[2])
+        dst_index, ok1 := strconv.parse_int(splits[0])
+        src_index, ok2 := strconv.parse_int(splits[1])
+        length, ok3    := strconv.parse_int(splits[2])
+        assert(ok1 && ok2 && ok3)
         append(&step.maps, Range_Map {
             to   = { dst_index, dst_index + length },
             from = { src_index, src_index + length },
         })
     }
     // Map ranges, transform into new ranges
-    for step, index in steps {
+    for step in steps {
         for seed_index := 0; seed_index < len(seeds); seed_index += 1 {
             if seeds[seed_index].mapped {
                 continue
             }
-            seed_start := seeds[seed_index].range.start
-            seed_end   := seeds[seed_index].range.end
-            for mapping in step.maps {
-                if ! range_intersects(mapping.from, seeds[seed_index].range) {
-                    continue
+            seed_range := seeds[seed_index].range
+            // Find whether the range is in the mapping
+            mapping_mb := Maybe(Range_Map) {}
+            for check_mapping in step.maps {
+                if range_intersects(check_mapping.from, seed_range) {
+                    mapping_mb = check_mapping
                 }
-                from := mapping.from
-                intersection_start := clamp(from.start, seed_start, seed_end)
-                intersection_end   := clamp(from.end,   seed_start, seed_end)
-                range_a := Range { seed_start,         intersection_start }
-                range_b := Range { intersection_start, intersection_end }
-                range_c := Range { intersection_end,   seed_end }
-                seeds[seed_index].range.start = range_b.start + mapping.to.start - mapping.from.start
-                seeds[seed_index].range.end   = range_b.end   + mapping.to.end   - mapping.from.end
-                seeds[seed_index].mapped = true
-                for range in ([]Range{range_a, range_c}) {
-                    if range_len(range) <= 0 {
-                        continue
-                    }
-                    have_already := false
-                    for check_seed in seeds {
-                        if range_equal(range, check_seed.range) {
-                            have_already = true
-                        }
-                    }
-                    if ! have_already {
-                        append(&seeds, Seed {
-                            mapped = false,
-                            range = range,
-                        })
-                    }
+            }
+            if mapping_mb == nil {
+                continue
+            }
+            mapping := mapping_mb.?
+            // Split into three ranges
+            intersection := Range {
+                clamp(mapping.from.start, seed_range.start, seed_range.end),
+                clamp(mapping.from.end,   seed_range.start, seed_range.end),
+            }
+            assert(range_len(intersection) > 0)
+            seeds[seed_index] = {
+                range = range_offset(intersection, mapping.to.start - mapping.from.start),
+                mapped = true,
+            }
+            // Push the unmapped ranges onto the queue
+            range_before := Range { seed_range.start, intersection.start }
+            range_after  := Range { intersection.end, seed_range.end }
+            for range in ([]Range {range_before, range_after}) {
+                if range_len(range) > 0 {
+                    append(&seeds, Seed {
+                        mapped = true,
+                        range = range,
+                    })
                 }
-                break
             }
         }
         for &seed in seeds {
@@ -248,6 +254,7 @@ part2_example :: proc(t: ^testing.T) {
     testing.expect_value(t, part2(PART2_EXAMPLE), PART2_EXAMPLE_EXPECT)
 }
 
+//46294175
 @(test)
 part2_run :: proc(t: ^testing.T) {
     runner(part2, #load(INPUT_FILENAME))
