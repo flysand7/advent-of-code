@@ -170,7 +170,6 @@ part2 :: proc(input: string) -> int {
             })
         }
     }
-    fmt.println(len(seeds))
     // Parse the conversion steps
     steps := make([dynamic]Step)
     lines := input[first_line_idx+1:]
@@ -179,7 +178,9 @@ part2 :: proc(input: string) -> int {
     for line in strings.split_lines_iterator(&lines) {
         if len(line) == 0 || strings.index_byte(line, ':') != -1 {
             if index != 0 {
-                append(&steps, step)
+                if len(step.maps) > 0 {
+                    append(&steps, step)
+                }
             }
             index += 1
             step = {
@@ -198,7 +199,7 @@ part2 :: proc(input: string) -> int {
         })
     }
     // Map ranges, transform into new ranges
-    for step in steps {
+    for step, step_number in steps {
         for seed_index := 0; seed_index < len(seeds); seed_index += 1 {
             if seeds[seed_index].mapped {
                 continue
@@ -220,7 +221,6 @@ part2 :: proc(input: string) -> int {
                 clamp(mapping.from.start, seed_range.start, seed_range.end),
                 clamp(mapping.from.end,   seed_range.start, seed_range.end),
             }
-            assert(range_len(intersection) > 0)
             seeds[seed_index] = {
                 range = range_offset(intersection, mapping.to.start - mapping.from.start),
                 mapped = true,
@@ -231,7 +231,7 @@ part2 :: proc(input: string) -> int {
             for range in ([]Range {range_before, range_after}) {
                 if range_len(range) > 0 {
                     append(&seeds, Seed {
-                        mapped = true,
+                        mapped = false,
                         range = range,
                     })
                 }
