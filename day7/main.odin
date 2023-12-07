@@ -62,10 +62,12 @@ part1 :: proc(input: string) -> int {
         has3 := false
         pairs := 0
         for count in card_counts {
-            if count == 5 { has5 = true }
-            if count == 4 { has4 = true }
-            if count == 3 { has3 = true }
-            if count == 2 { pairs += 1 }
+            switch count {
+                case 5: has5 = true
+                case 4: has4 = true
+                case 3: has3 = true
+                case 2: pairs += 1
+            }
         }
         score := 0 // high card
         if has5 {
@@ -97,7 +99,6 @@ part1 :: proc(input: string) -> int {
     for hand, index in hands {
         rank := index+1
         cards := hand.cards
-        fmt.println(transmute(string) cards[:], rank, hand.bid)
         sum += rank * hand.bid
     }
     return sum
@@ -165,10 +166,12 @@ part2 :: proc(input: string) -> int {
         has3 := false
         pairs := 0
         for count in card_counts[1:] {
-            if count == 5 { has5 = true }
-            if count == 4 { has4 = true }
-            if count == 3 { has3 = true }
-            if count == 2 { pairs += 1 }
+            switch count {
+                case 5: has5 = true
+                case 4: has4 = true
+                case 3: has3 = true
+                case 2: pairs += 1
+            }
         }
         // Assign score for each combo.
         score := 0
