@@ -153,10 +153,12 @@ part2 :: proc(input: string) -> int {
         hand: Hand
         hand.cards = cards
         hand.bid = bid
+        // Count each card by index.
         card_counts := [13]int{}
         for card in cards {
             card_counts[card_index(card)] += 1
         }
+        // Find the largest card and add joker counts to it.
         largest_count := card_counts[1]
         largest_index := 1
         for index in 2 ..< len(card_counts) {
@@ -166,6 +168,7 @@ part2 :: proc(input: string) -> int {
             }
         }
         card_counts[largest_index] += card_counts[0]
+        // Figure out parameters for deciding the card combo.
         has5 := false
         has4 := false
         has3 := false
@@ -176,6 +179,7 @@ part2 :: proc(input: string) -> int {
             if count == 3 { has3 = true }
             if count == 2 { pairs += 1 }
         }
+        // Assign score for each combo.
         score := 0
         score_type := "high card" // Debugging info.
         if has5 {
