@@ -29,20 +29,16 @@ QQQJA 483`
 //        20        16        12        8         4         0
 part1 :: proc(input: string) -> int {
     card_index :: proc(card: u8) -> uint {
-        if '2' <= card && card <= '9' {
-            return uint(card - '2')
-        } else if card == 'T' {
-            return 8
-        } else if card == 'J' {
-            return 9
-        } else if card == 'Q' {
-            return 10
-        } else if card == 'K' {
-            return 11
-        } else if card == 'A' {
-            return 12
+        switch card {
+            case '2'..='9': return uint(card - '2')
+            case 'T': return 8
+            case 'J': return 9
+            case 'Q': return 10
+            case 'K': return 11
+            case 'A': return 12
+            case: panic("unknown card")
         }
-        panic("unknown card")
+        return 0
     }
     Hand :: struct {
         cards: [5]u8,
@@ -123,22 +119,17 @@ PART2_EXAMPLE_EXPECT :: 5905
 PART2_EXAMPLE :: PART1_EXAMPLE
 
 part2 :: proc(input: string) -> int {
-    
     card_index :: proc(card: u8) -> uint {
-        if '2' <= card && card <= '9' {
-            return uint(card - '2')+1
-        } else if card == 'T' {
-            return 9
-        } else if card == 'J' {
-            return 0
-        } else if card == 'Q' {
-            return 10
-        } else if card == 'K' {
-            return 11
-        } else if card == 'A' {
-            return 12
+        switch card {
+            case 'J': return 0
+            case '2'..='9': return uint(card - '2')+1
+            case 'T': return 9
+            case 'Q': return 10
+            case 'K': return 11
+            case 'A': return 12
+            case: panic("unknown card")
         }
-        panic("unknown card")
+        return 0
     }
     Hand :: struct {
         cards: [5]u8,
