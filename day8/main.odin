@@ -130,6 +130,12 @@ part2 :: proc(input: string) -> int {
     // This isn't natural so we gotta normalize these values. We iterate up by b/gcd in case
     // of a, and a/gcd in case of b until we reach positive values for an and bn. That's our
     // minimum amounts of loops each value will go through the finishing value.
+    //
+    // In order to continue the loop, we'll consider that the minimum amount of steps to get both
+    // 0'th and 1'st elements of the array into the finishing position we needed:
+    //   offset[1] + n[1]*cycles[1]
+    // Steps.
+    // We use that as our value for the next iteration.
     a_offset := node_offsets[0]
     a_cycle := node_cycles[0]
     for i in 1 ..< len(nodes) {
