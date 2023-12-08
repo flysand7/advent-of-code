@@ -110,8 +110,6 @@ part2 :: proc(input: string) -> int {
         y := x1
         return gcd, x, y
     }
-    fmt.println("offs", node_offsets) // 2, 3
-    fmt.println("cyc", node_cycles)   // 2, 3
     // Solving the diophantine equations in a loop.
     // Basically what we got here is an array of these values:
     //   offset[i] + n[i]*cycles[i]
@@ -138,21 +136,15 @@ part2 :: proc(input: string) -> int {
         b_offset := node_offsets[i]
         b_cycle := node_cycles[i]
         c := b_offset - a_offset
-        // fmt.println("a cycle", a_cycle, "b cycle", b_cycle)
         gcd, ag, bg := extended_gcd(a_cycle, b_cycle)
-        // fmt.println("ag", ag, "bg", bg)
         assert(gcd != 0)
         assert(c % gcd == 0)
         an := ag * (c / gcd)
         bn := -bg * (c / gcd)
-        // fmt.println("an", an, "bn", bn)
         for bn < 0 || an < 0 {
             bn += a_cycle / gcd
             an += b_cycle / gcd
         }
-        // fmt.println("agcd", a_cycle / gcd)
-        // fmt.println("bgcd", b_cycle / gcd)
-        // fmt.println("an", an, "bn", bn)
         assert(an > 0)
         assert(bn > 0)
         assert(a_offset + a_cycle*an == b_offset + b_cycle*bn)
