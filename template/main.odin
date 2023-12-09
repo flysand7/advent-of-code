@@ -3,6 +3,7 @@ package main
 import "core:os"
 import "core:fmt"
 import "core:strings"
+import "core:strconv"
 import "core:slice"
 import "core:testing"
 import "core:time"
@@ -20,13 +21,12 @@ part1 :: proc(input: string) -> int {
 }
 
 @(test)
-part1_example :: proc(t: ^testing.T) {
-    testing.expect_value(t, part1(PART1_EXAMPLE), PART1_EXAMPLE_EXPECT)
-}
-
-@(test)
 part1_run :: proc(t: ^testing.T) {
-    runner(part1, #load(INPUT_FILENAME))
+    input := transmute(string) #load(INPUT_FILENAME)
+    if len(input) != 0 {
+        runner(part1, input)
+    }
+    testing.expect_value(t, part1(PART1_EXAMPLE), PART1_EXAMPLE_EXPECT)
 }
 
 // -----------------------------------  PART 2 --------------------------------------------------//
@@ -39,13 +39,12 @@ part2 :: proc(input: string) -> int {
 }
 
 @(test)
-part2_example :: proc(t: ^testing.T) {
-    testing.expect_value(t, part2(PART2_EXAMPLE), PART2_EXAMPLE_EXPECT)
-}
-
-@(test)
 part2_run :: proc(t: ^testing.T) {
-    runner(part2, #load(INPUT_FILENAME))
+    input := transmute(string) #load(INPUT_FILENAME)
+    if len(input) != 0 {
+        runner(part2, input)
+    }
+    testing.expect_value(t, part2(PART2_EXAMPLE), PART2_EXAMPLE_EXPECT)
 }
 
 // -----------------------------------  MISC --------------------------------------------------//
