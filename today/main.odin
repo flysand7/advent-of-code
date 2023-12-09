@@ -7,6 +7,7 @@ import "core:strconv"
 import "core:slice"
 import "core:testing"
 import "core:time"
+import "core:math"
 import "core:mem"
 
 INPUT_FILENAME :: "./input"
