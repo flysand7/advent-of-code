@@ -211,8 +211,7 @@ part2 :: proc(input: string) -> int {
     last_direction: Direction
     next_direction: Direction
     // We'll need these trackers for detection of "insideness" later on
-    blockers := make(map[int]Blocker)
-    corners := make(map[int]Pipe)
+    path := make(map[int]Pipe)
     // Make the first step
     for offset, direction in directions {
         check_pos := pos+offset
@@ -221,15 +220,10 @@ part2 :: proc(input: string) -> int {
         if check_spot == '.' do continue
         check_pipe := pipes[check_spot]
         if reject, ok := direction_match(direction, check_pipe); ok {
-            // fmt.println(check_pos, "From", direction, "To", reject)
             start_direction = direction
             last_direction = direction
             next_direction = reject
-            if start_direction != next_direction {
-                corners[check_pos] = Pipe {start_direction, next_direction}
-            } else {
-                blockers[check_pos] = Blocker {orientation = direction_orientation(next_direction)}
-            }
+            path[check_pos] = Pipe {start_direction, next_direction}
             pos = check_pos
             break
         }
@@ -239,24 +233,14 @@ part2 :: proc(input: string) -> int {
         check_pos := pos+directions[next_direction]
         check_spot := cast(rune) input[check_pos]
         if check_spot == 'S' {
-            // fmt.println(check_pos, "From", last_direction, "To", next_direction)
-            if next_direction == start_direction {
-                blockers[check_pos] = {orientation = direction_orientation(last_direction)}
-            } else {
-                corners[check_pos] = Pipe {start_direction, direction_negate(next_direction)}
-            }
+            path[check_pos] = Pipe {next_direction, start_direction}
             break
         }
         check_pipe := pipes[check_spot]
         if reject, ok := direction_match(next_direction, check_pipe); ok {
             last_direction = next_direction
             next_direction = reject
-            // fmt.println(check_pos, "From", last_direction, "To", next_direction)
-            if last_direction == next_direction {
-                blockers[check_pos] = {orientation = direction_orientation(last_direction)}
-            } else {
-                corners[check_pos] = Pipe {last_direction, next_direction}
-            }
+            path[check_pos] = Pipe {last_direction, next_direction}
             pos = check_pos
         } else {
             assert(false)
@@ -265,32 +249,24 @@ part2 :: proc(input: string) -> int {
     n_inside := 0
     n_outside := 0
     for char, offs in input do if char != '\n' {
-        if offs in blockers {
+        if offs in path {
             continue
         }
-        if offs in corners {
-            continue
-        }
-        // fmt.println("---")
         char_x := offs % stride
         char_y := offs / stride
         n_intersect := 0
         // Find number of intersections.
         pair_winding := Winding.None
-        for i := offs; i<len(input) && input[i] != '\n'; i += 1 {
-            // Straight edges.
-            if i in blockers {
-                blocker := blockers[i]
-                if blocker.orientation == .V {
-                    // fmt.println("blocker at", i, i%stride, char_y, blocker)
+        for i := offs; i<len(input) && input[i] != '\n'; i += 1 do if i in path {
+            pipe := path[i]
+            if pipe[0] == pipe[1] {
+                // Straight edges.
+                if direction_orientation(pipe[0]) == .V {
                     n_intersect += 1
                 }
-            }
-            // Corners.
-            if i in corners {
-                corner_pipe := corners[i]
-                corner_winding := pipe_windings[corner_pipe[0]][corner_pipe[1]]
-                // fmt.println("corner at", i, i%stride, char_y, corner_pipe, pair_winding, corner_winding)
+            } else {
+                // Corners.
+                corner_winding := pipe_windings[pipe[0]][pipe[1]]
                 if pair_winding == .None {
                     pair_winding = corner_winding
                 } else {
@@ -305,14 +281,8 @@ part2 :: proc(input: string) -> int {
             n_outside += 1
         } else {
             n_inside += 1
-            // fmt.println("inside:", n_intersect, char_x, char_y)
         }
     }
-    // if animal in corners {
-    //     fmt.println("start corner", corners[animal])
-    // } else if animal in blockers {
-    //     fmt.println("start blocker", blockers[animal])
-    // }
     return n_inside
 }
 
@@ -320,7 +290,7 @@ part2 :: proc(input: string) -> int {
 part2_run :: proc(t: ^testing.T) {
     input := transmute(string) #load(INPUT_FILENAME)
     if len(input) != 0 {
-        runner(part2, input)
+        // runner(part2, input)
     }
     testing.expect_value(t, part2(PART2_EXAMPLE), PART2_EXAMPLE_EXPECT)
 }
