@@ -24,10 +24,10 @@ part1 :: proc(input: string) -> int {
 @(test)
 part1_run :: proc(t: ^testing.T) {
     input := transmute(string) #load(INPUT_FILENAME)
+    testing.expect_value(t, part1(PART1_EXAMPLE), PART1_EXAMPLE_EXPECT)
     if len(input) != 0 {
         runner(part1, input)
     }
-    testing.expect_value(t, part1(PART1_EXAMPLE), PART1_EXAMPLE_EXPECT)
 }
 
 // -----------------------------------  PART 2 --------------------------------------------------//
