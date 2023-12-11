@@ -14,38 +14,51 @@ INPUT_FILENAME :: "./input"
 
 // -----------------------------------  PART 1 --------------------------------------------------//
 
-PART1_EXAMPLE_EXPECT :: 0
-PART1_EXAMPLE :: ``
-
 part1 :: proc(input: string) -> int {
     return 0
 }
 
+PART1_RUN_INPUT   :: false
+
 @(test)
 part1_run :: proc(t: ^testing.T) {
     input := transmute(string) #load(INPUT_FILENAME)
-    testing.expect_value(t, part1(PART1_EXAMPLE), PART1_EXAMPLE_EXPECT)
-    if len(input) != 0 {
-        runner(part1, input)
+    for test in tests do if test.enabled {
+        testing.expect_value(t, part1(test.input), test.expect)
     }
+    if len(input) != 0 {
+        if PART1_RUN_INPUT {
+            runner(part1, input)
+        }
+    }
+}
+
+tests := []struct {enabled: bool, expect: int, input: string} {
+    {true, 0, 
+``,
+    },
 }
 
 // -----------------------------------  PART 2 --------------------------------------------------//
 
-PART2_EXAMPLE_EXPECT :: 0
-PART2_EXAMPLE :: ``
 
 part2 :: proc(input: string) -> int {
     return 0
 }
 
+PART2_RUN_INPUT :: false
+
 @(test)
 part2_run :: proc(t: ^testing.T) {
     input := transmute(string) #load(INPUT_FILENAME)
-    if len(input) != 0 {
-        runner(part2, input)
+    for test in tests do if test.enabled {
+        testing.expect_value(t, part2(test.input), test.expect)
     }
-    testing.expect_value(t, part2(PART2_EXAMPLE), PART2_EXAMPLE_EXPECT)
+    if len(input) != 0 {
+        if PART2_RUN_INPUT {
+            runner(part2, input)
+        }
+    }
 }
 
 // -----------------------------------  MISC --------------------------------------------------//
