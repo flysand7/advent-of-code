@@ -1,6 +1,10 @@
 
 # Odin output
 *.bin
+*.exe
+*.pdb
+*.obj
+*.dll
 
 # Editor-specific
 /ols.json
