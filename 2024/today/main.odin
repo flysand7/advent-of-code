@@ -19,88 +19,27 @@ INPUT_FILENAME :: "./input"
 // -----------------------------------  PART 1 --------------------------------------------------//
 
 part1_tests := []Test {
-    {true, 11, 
-`3   4
-4   3
-2   5
-1   3
-3   9
-3   3`,
+    {true, 0, 
+``,
     },
 }
 
 part1 :: proc(input: string) -> int {
     input := input
-    lists: [2][dynamic]int
-    for line in strings.split_lines_iterator(&input) {
-        line := line
-        n := 0
-        for s in strings.split_by_byte_iterator(&line, ' ') {
-            if len(s) == 0 {
-                continue
-            }
-            number, ok := strconv.parse_int(s, 10)
-            assert(ok)
-            append(&lists[n], number)
-            n += 1
-        }
-    }
-    slice.sort(lists[0][:])
-    slice.sort(lists[1][:])
-    assert(len(lists[0]) == len(lists[1]))
-    assert(len(lists[0]) > 0)
-    sum := 0
-    for i in 0 ..< len(lists[0]) {
-        distance := abs(lists[0][i] - lists[1][i])
-        sum += distance
-    }
-    return sum
+    return 0
 }
 
 // -----------------------------------  PART 2 --------------------------------------------------//
 
 part2_tests := []Test {
-    {true, 31, 
-`3   4
-4   3
-2   5
-1   3
-3   9
-3   3`,
+    {true, 0, 
+``,
     },
 }
 
 part2 :: proc(input: string) -> int {
     input := input
-    lists: [2][dynamic]int
-    for line in strings.split_lines_iterator(&input) {
-        line := line
-        n := 0
-        for s in strings.split_by_byte_iterator(&line, ' ') {
-            if len(s) == 0 {
-                continue
-            }
-            number, ok := strconv.parse_int(s, 10)
-            assert(ok)
-            append(&lists[n], number)
-            n += 1
-        }
-    }
-    slice.sort(lists[0][:])
-    slice.sort(lists[1][:])
-    assert(len(lists[0]) == len(lists[1]))
-    assert(len(lists[0]) > 0)
-    sum := 0
-    for i in 0 ..< len(lists[0]) {
-        n_appear := 0
-        for j in 0 ..< len(lists[1]) {
-            if lists[0][i] == lists[1][j] {
-                n_appear += 1
-            }
-        }
-        sum += lists[0][i] * n_appear
-    }
-    return sum
+    return 0
 }
 
 // -----------------------------------  MISC --------------------------------------------------//
