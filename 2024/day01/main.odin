@@ -9,6 +9,7 @@ import "core:testing"
 import "core:time"
 import "core:math"
 import "core:mem"
+import "core:simd"
 
 ES_RESET :: "\e[0m"
 ES_RED :: "\e[31m"
@@ -29,32 +30,34 @@ part1_tests := []Test {
     },
 }
 
+parse_u32_5 :: proc(s: [^]u8) -> u32 {
+    r := u32(s[0] - '0')
+    r = 10*r + u32(s[1] - '0')
+    r = 10*r + u32(s[2] - '0')
+    r = 10*r + u32(s[3] - '0')
+    r = 10*r + u32(s[4] - '0')
+    return r
+}
+
 part1 :: proc(input: string) -> int {
-    input := input
-    lists: [2][dynamic]int
-    for line in strings.split_lines_iterator(&input) {
-        line := line
-        n := 0
-        for s in strings.split_by_byte_iterator(&line, ' ') {
-            if len(s) == 0 {
-                continue
-            }
-            number, ok := strconv.parse_int(s, 10)
-            assert(ok)
-            append(&lists[n], number)
-            n += 1
-        }
+    input := transmute([]u8) input
+    list_a: [1000]i32 = ---
+    list_b: [1000]i32 = ---
+    idx := 0
+    for line_idx := 0; line_idx < len(input); line_idx += 14 {
+        list_a[idx] = cast(i32) parse_u32_5(&input[line_idx+0])
+        list_b[idx] = cast(i32) parse_u32_5(&input[line_idx+8])
+        idx += 1
     }
-    slice.sort(lists[0][:])
-    slice.sort(lists[1][:])
-    assert(len(lists[0]) == len(lists[1]))
-    assert(len(lists[0]) > 0)
-    sum := 0
-    for i in 0 ..< len(lists[0]) {
-        distance := abs(lists[0][i] - lists[1][i])
-        sum += distance
+    slice.sort(list_a[:])
+    slice.sort(list_b[:])
+    sum := u32(0)
+    for idx := 0; idx < 1000; idx += 8 {
+        a := simd.from_slice(#simd [8]i32, list_a[idx:idx+8])
+        b := simd.from_slice(#simd [8]i32, list_b[idx:idx+8])
+        sum += simd.reduce_add_ordered(transmute(#simd [8]u32) simd.abs(simd.sub(a, b)))
     }
-    return sum
+    return int(sum)
 }
 
 // -----------------------------------  PART 2 --------------------------------------------------//
@@ -71,36 +74,48 @@ part2_tests := []Test {
 }
 
 part2 :: proc(input: string) -> int {
-    input := input
-    lists: [2][dynamic]int
-    for line in strings.split_lines_iterator(&input) {
-        line := line
-        n := 0
-        for s in strings.split_by_byte_iterator(&line, ' ') {
-            if len(s) == 0 {
-                continue
-            }
-            number, ok := strconv.parse_int(s, 10)
-            assert(ok)
-            append(&lists[n], number)
-            n += 1
-        }
+    input := transmute([]u8) input
+    list_a: [1000]u32 = ---
+    list_b: [1000]u32 = ---
+    idx := 0
+    for line_idx := 0; line_idx < len(input); line_idx += 14 {
+        list_a[idx] = parse_u32_5(&input[line_idx+0])
+        list_b[idx] = parse_u32_5(&input[line_idx+8])
+        idx += 1
     }
-    slice.sort(lists[0][:])
-    slice.sort(lists[1][:])
-    assert(len(lists[0]) == len(lists[1]))
-    assert(len(lists[0]) > 0)
-    sum := 0
-    for i in 0 ..< len(lists[0]) {
-        n_appear := 0
-        for j in 0 ..< len(lists[1]) {
-            if lists[0][i] == lists[1][j] {
-                n_appear += 1
+    slice.sort(list_a[:])
+    slice.sort(list_b[:])
+    sum := u32(0)
+    idx_a := 0
+    idx_b := 0
+    iterate_all: for {
+        val_a := list_a[idx_a]
+        for val_a > list_b[idx_b] {
+            idx_b += 1
+            if idx_b == len(list_b) {
+                break iterate_all
             }
         }
-        sum += lists[0][i] * n_appear
+        val_b := list_b[idx_b]
+        for list_a[idx_a] < val_b {
+            idx_a += 1
+            if idx_a == len(list_a) {
+                break iterate_all
+            }
+        }
+        val_a = list_a[idx_a]
+        for val_a == list_b[idx_b] {
+            sum += val_a
+            idx_b += 1
+            if idx_b == len(list_b) {
+                break iterate_all
+            }
+        }
+        if idx_a >= len(list_a) || idx_b >= len(list_b) {
+            break
+        }
     }
-    return sum
+    return int(sum)
 }
 
 // -----------------------------------  MISC --------------------------------------------------//
